@@ -80,7 +80,7 @@ With an asymmetric scenario, a message may be sent securely without the need to 
 * Sender is assured that only the recipient will understand secret message
 
 Alice wants to communicate securely with Bob but she does not want anybody to read the messages.
-* She will use Bob’s public key to encrypt the message.
+* **She will use Bob’s public key to encrypt the message**.
 * Alice then sends the encrypted message to Bob.
 * Bob receives the encrypted message and decrypts it using his private key.
 * From this, Bob is able to read the original message sent by Alice.
@@ -88,7 +88,7 @@ Alice wants to communicate securely with Bob but she does not want anybody to re
 ![Asymmetric encryption](./images/asym-encryption.png)
 
 Alice wants to make sure the message was sent by Bob.
-* Bob uses his private key to encrypt the message (in fact a hash of the message, but we will see that later).
+* **Bob uses his private key to encrypt the message** (in fact a hash of the message, but we will see that later).
 * Bob then sends the message and the signature to Alice (the location of the signature will be discussed later).
 * Alice receives the message and the signature, she uses Bob’s public key to validate the hash of the message.
 * From this, if the validation is successful Alice is confident that this message comes from Bob, because he is the only one to have the private key associated to Bob's public key.
@@ -210,8 +210,13 @@ The genius idea of Netscape was that they combined simple ideas (math functions)
 
 ## Putting things together
 
-## Understanding a Cipher Spec
+TLS is defined by 2 series of protocols:
+* TLS Handshaking (High cost): The client produces an encrypted premaster key and encrypts it with the public key of the server certificate. This information is encrypted a second time with the public key of the server (and not the public key of the server certificate) received in the Server Key Exchange message.
+* TLS Record: The Record Protocol takes messages to be transmitted, fragments the data into manageable blocks, optionally compresses the data, applies a MAC, encrypts, and transmits the result.
 
+
+## Understanding a Cipher Spec
+![Understanding a cipher specification](./images/cipher-spec.png)
 
 sources
 Wikipedia https://en.wikipedia.org/wiki/Public-key_cryptography
