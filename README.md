@@ -5,7 +5,7 @@ This is work in progress as of 3rd July 2020 (first version)!!!!
 # Introduction
 This paper is an attempt to explain TLS. I have been asked this question many times so want to share my little knowledge on the subject. You will find here the basis of better understanding what is behind and the challenges to manage keys. This should help you to configure any product when using TLS.
 # Fundamentals
-In this first chapter, I provide the building blocks needed to understand correctly how SSK (/TLS) is working.
+In this first chapter, I provide the building blocks needed to understand correctly how SSL (/TLS) is working.
 
 ## Symmetric encryption
 ### Principle and definitions
@@ -146,6 +146,7 @@ In more details, we find the following information.
 * Date of expiration
 * Issuer's distinguished name (the CA)
 * Issuer's digital signature
+* Serial number
 
 browsers etc. ship with some 50 "known" signing "Certificate Authorities
 
@@ -156,7 +157,7 @@ A digital certificate serves two purposes
 * It establishes the owner’s identity
 * It makes the owner's public key available
 
-### Certificate trust model
+### Certificate trust model - Certificates chain
 We have the same distribution problem as earlier - secure distribution of identity instead of secret key. Again the public-key cryptography resolves this issue with the inclusion of a trusted third party - known as a "Certificate Authority" (CA)
 * CA will vouch for the identity of the recipient and will present a certificate of authenticity to recipient
 * certificate is digitally signed by the CA and this digital signature forms the trust between sender and CA
