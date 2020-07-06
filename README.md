@@ -5,6 +5,8 @@ This is work in progress as of 3rd July 2020 (first version)!!!!
 # Introduction
 This paper is an attempt to explain TLS. I have been asked this question many times so want to share my little knowledge on the subject. You will find here the basis of better understanding what is behind and the challenges to manage keys. This should help you to configure any product when using TLS.
 # Fundamentals
+In this first chapter, I provide the building blocks needed to understand correctly how SSK (/TLS) is working.
+
 ## Symmetric encryption
 ### Principle and definitions
 The principle with symmetric encryption is simply to use the same key to encrypt and decrypt the plain text. The value of the key used in the sample below is 6.
@@ -88,7 +90,7 @@ Alice wants to communicate securely with Bob but she does not want anybody to re
 ![Asymmetric encryption](./images/asym-encryption.png)
 
 Alice wants to make sure the message was sent by Bob.
-* **Bob uses his private key to encrypt the message** (in fact a hash of the message, but we will see that later).
+* **Bob uses his private key to sign (encrypt) the message** (in fact a hash of the message, but we will see that later).
 * Bob then sends the message and the signature to Alice (the location of the signature will be discussed later).
 * Alice receives the message and the signature, she uses Bob’s public key to validate the hash of the message.
 * From this, if the validation is successful Alice is confident that this message comes from Bob, because he is the only one to have the private key associated to Bob's public key.
@@ -105,8 +107,7 @@ Here is the mathematical definition of a surjection:
 
 ![Surjection](./images/surjection.png)
 
-Let's illustrate a hash function
-What ever the lengths, the results have the same length. Changing a few characters change the results completely. This last property is what we use to improve performances of the signature scenario by hashing only a hash value of the original message instead of the full message. Of course, this is useful for signature and does not apply to encryption. (Hashing is a surjection, and we need to get the full message decrypted, not its hash!).
+Let's illustrate a hash function. What ever the lengths, the results have the same length. Changing a few characters change the results completely. This last property is what we use to improve performances of the signature scenario by hashing only a hash value of the original message instead of the full message. Of course, this is useful for signature and does not apply to encryption. (Hashing is a surjection, and we need to get the full message decrypted, not its hash!).
 
 ![Hashing](./images/hash.png)
 
@@ -117,40 +118,50 @@ Below illustrating the use of different SHA based algorithms on the same text wi
 The common algorithms are SHA1, sha256, sha384, sha512, MD2, MD4, MD5, tigernnn,mn, ...
 
 ### Message Authentication Code MAC (HMAC)
-hash code seeded with a secret
+HMAC is a variant of hashing, by adding a key it makes the overall process more secure, in simple terms, it is a hash code seeded with a secret.
 
+### Putting things together for the signature part
+Let's revisit the signature scenario taking in account the hashing.
+So when Bob signed the message, what he really did was,
+* Took a hash of the message
+* Encrypted the hash with his private key
+* Sent the message and the hash value
+* Alice hashed the message she received
+* She decrypted the value of the hash sent by Bob
+* And she compared both values
+
+![Full signature](./images/full-signature.png)
 
 ## Certificate
-TO BE REVIEWED
-### Certificate purpose
-How does sender know the identity of recipient?
-same distribution problem as earlier - secure distribution of identity instead of secret key
-public-key cryptography resolves this issue with the inclusion of a trusted third party - known as a "Certificate Authority" (CA)
-CA will vouch for the identity of the recipient and will present a certificate of authenticity to recipient
-certificate is digitally signed by the CA and this digital signature forms the trust between sender and CA
-recipient certificate contains its public key
-sender simply collects the recipient's digital certificate, validates CA digital signature and extracts public key (see step 1 above)
-
-subject - who does this certificate represent
-signer - who says so
-browsers etc. ship with some 50 "known" signing "Certificate Authorities
-
-Digital certificates allow unique identification of an entity
-SSL uses digital certificates for public-key cryptography
-A digital certificate serves two purposes
-* it establishes the owner’s identity
-* it makes the owner's public key available
+In the previous chapters, we assume that the identity Bob said was something easy to define. But how does sender know the identity of recipient? And vice-versa how the recipient knows the identity of the sender. This is where the certificate comes to play.
 
 ### Certificate content
-A digital certificate contains specific pieces of information about the identity of the certificate owner and about the certificate authority
-* owner's distinguished name (DN)
-* owner's public key
-* date of issue
-* date of expiration
-* issuer's distinguished name (the CA)
-* issuer's digital signature
+A **digital certificate** contains specific pieces of information about the **identity** of the certificate **owner** and about the **certificate authority**.
+* The subject - who does this certificate represent
+* Signer - who says so
+
+In more details, we find the following information.
+* Owner's distinguished name (DN)
+* Date of issue
+* Date of expiration
+* Issuer's distinguished name (the CA)
+* Issuer's digital signature
+
+browsers etc. ship with some 50 "known" signing "Certificate Authorities
 
 A certificate may be signed by its owner (self-signed certificate)
+
+Digital certificates allows unique identification of an entity. SSL uses digital certificates for public-key cryptography.
+A digital certificate serves two purposes
+* It establishes the owner’s identity
+* It makes the owner's public key available
+
+### Certificate trust model
+We have the same distribution problem as earlier - secure distribution of identity instead of secret key. Again the public-key cryptography resolves this issue with the inclusion of a trusted third party - known as a "Certificate Authority" (CA)
+* CA will vouch for the identity of the recipient and will present a certificate of authenticity to recipient
+* certificate is digitally signed by the CA and this digital signature forms the trust between sender and CA
+recipient certificate contains its public key
+* sender simply collects the recipient's digital certificate, validates CA digital signature and extracts public key (see step 1 above)
 
 ### Two methods for issuing certificates
 * Client-side request
@@ -183,7 +194,7 @@ Some of its tasks are:
 * Certificate Repository – stores valid certificates that can be trusted
 * Certificate Revocation List – stores certificates that are invalid and should not be trusted
 
-### CRL
+### CRL and OCSP
 What if a private key is exposed?
 The key pair becomes invalid
 The owner of the key pair may not continue using the key pair securely
@@ -214,11 +225,13 @@ TLS is defined by 2 series of protocols:
 * TLS Handshaking (High cost): The client produces an encrypted premaster key and encrypts it with the public key of the server certificate. This information is encrypted a second time with the public key of the server (and not the public key of the server certificate) received in the Server Key Exchange message.
 * TLS Record: The Record Protocol takes messages to be transmitted, fragments the data into manageable blocks, optionally compresses the data, applies a MAC, encrypts, and transmits the result.
 
-
 ## Understanding a Cipher Spec
 ![Understanding a cipher specification](./images/cipher-spec.png)
 
-sources
+## Performances aspect
+![Cipher specs performance impact](./images/cipher-spec-perfomance-comparison.png)
+
+# Sources
 Wikipedia https://en.wikipedia.org/wiki/Public-key_cryptography
 
 
