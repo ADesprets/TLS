@@ -230,7 +230,7 @@ Here a small tribute to Netscape, an early player in Internet space. There are a
 * They created the Mozilla organisation
 * They reminds me a time when I was just out from university :-)
 
-Wahoo, this is how big they change the world!
+Wahoo, this is how big they changed the world!
 
 ![Netscape Logo](./images/netscape-logo.png)
 
