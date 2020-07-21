@@ -3,7 +3,7 @@
 This is work in progress as of 21st July 2020 (first version)!!!!
 
 # Introduction
-This paper is an attempt to explain TLS. I have been asked this question many times so want to share my little knowledge on the subject. You will find here the basis of better understanding what is behind and the challenges to manage keys. This should help you to configure any product when using TLS.
+This paper is an attempt to explain TLS. You will find here the basis of better understanding what is behind and the challenges to manage keys. This should help you to configure any product when using TLS.
 # Fundamentals
 In this first chapter, I provide the building blocks needed to understand correctly how SSL (/TLS) is working. The very good idea around SSL is that the inventors used cryptographic methodology, mitigated risks and took in consideration performance at any steps so at the end SSL was both secured and fast.
 
@@ -274,6 +274,14 @@ To configure SSL/TLS, you need to add the server certificate if not present (or 
 If you use mutual SSL/TLS, you need to add the client certificate if not present (or a parent in the chain of certificate) on the trust store of the server (green arrow).
 
 ![Trust store and key store](./images/trust-key-stores.png)
+
+## SSL/TLS versions
+* SSL V1.0 - deprecated
+* SSL V2.0 - deprecated
+* SSL V3.0 - deprecated
+* TLS V1.0 - deprecated
+* TLS V2.0 - previous version used significantly
+* TLS V3.0 - Current version
 
 ## Performances aspect
 ![Cipher specs performance impact](./images/cipher-spec-perfomance-comparison.png)
