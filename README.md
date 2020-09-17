@@ -255,7 +255,7 @@ TLS is a client-server model defined by 2 series of protocols:
 ![Understanding a cipher specification](./images/cipher-spec.png)
 
 ## Key store and Trust store
-So far we have discussed of the protocol, and interactions, but how do store in a secure manner the private keys and public certificates?
+So far we have discussed of the protocol, and interactions, but how do we store in a secure manner the private keys and public certificates?
 Keys need to be protected and stored securely. Certificates need to be accessible when used during the SSL/TLS handshake.
 
 There are several formats for the stores:
@@ -279,9 +279,9 @@ If you use mutual SSL/TLS, you need to add the client certificate if not present
 * SSL V1.0 - deprecated
 * SSL V2.0 - deprecated
 * SSL V3.0 - deprecated
-* TLS V1.0 - deprecated
-* TLS V2.0 - previous version used significantly
-* TLS V3.0 - Current version
+* TLS V1.1 - deprecated
+* TLS V1.2 - previous version used significantly
+* TLS V1.3 - Current version
 
 ## Performances aspect
 ![Cipher specs performance impact](./images/cipher-spec-perfomance-comparison.png)
