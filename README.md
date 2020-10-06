@@ -295,7 +295,10 @@ To create Certificate Signing Request
 `openssl req -new -newkey rsa:2048 -nodes -out servername.csr -keyout servername.key`
 
 ## Debugging
-
+### In Kubernetes world
+The following command will return the validity of a certificate
+kubectl get secret <secret> -o yaml | grep "\.crt" | awk '{ print $2 }' | base64 --decode | openssl x509 -in - -text |grep Validity -A 2
+![Debug Certificate validity](./images/debug-get-cert-validity.png)
 
 # Sources
 Wikipedia https://en.wikipedia.org/wiki/Public-key_cryptography
