@@ -28,6 +28,18 @@ Here is a sample of encrypting the message `hello caesar` with different keys:
 
 ![Simple symmetric encryption](./images/hello-caesar.png)
 
+### The wheel of Thomas Jefferson
+The future president of the United invented a more robust mechanism but also very simple.
+The wheel are made of a good number (for example between 30 and 40, 36 for the original model) of small disks. Each disk gets the 26 letters of the alphabet in any order and different between each disk. Like with Caesar, you roll all the disks with a key (rotation mechanism).
+The big advantage of this system is that now, you not only need know the key (to rotate the disk correctly) but also get physical the same wheel used to encrypt the data, so a combination of what you know and what you have. Of course, it raises the challenge of distributing securely the wheel. The wheel of Jefferson was used under the name of M.94 by the United States army between 1924 and 1942.
+
+![Jefferson wheel](./images/jefferson.jpg)
+
+### Enigma
+The famous Enigma machine, invented in 1918, is again an evolution following a measure and counter measure evolution. The problem with existing cryptographic system at the time, like with the wheel of Jefferson, is that using a pretty small amount of time a brute force attack can be done by a human. This concept is important, if the difference of time to encrypt and decrypt is small then the system is not good. One reason is that the value of confidential information usually decreases over time. Enigma is going to use the latest technology, and in particular the use of electricity and electro-mechanic in order to make the number of combinations very large (4,64 * 10^22). It is some ways similar to the wheel of Jefferson but where you had 26 different keys for each wheel, here using 3 rotors of 26 letters, the number is so large that a human would not be able to decipher the message especially with a brute force attack. One additional concept used in Enigma is also that the association between each letter change every time a letter is typed using the three rotors, which improves greatly the algorithm. Only Alan Turing was able to create a machine to perform automatic testing.
+
+![Enigma](./images/Enigma_1940.JPG)
+
 ### Secure distribution of secret keys is a challenge
 Symmetric algorithms are simple, fast way of encrypting and decrypting, but have many challenges.
 * How can a key be received by intended recipient without interference?
@@ -299,6 +311,12 @@ To create Certificate Signing Request
 The following command will return the validity of a certificate
 kubectl get secret <secret> -o yaml | grep "\.crt" | awk '{ print $2 }' | base64 --decode | openssl x509 -in - -text |grep Validity -A 2
 ![Debug Certificate validity](./images/debug-get-cert-validity.png)
+
+# Scenario
+## Ajouter TLS invocation API
+## Utilisation du Certificate Manager
+## Sécurisation d'un flux toolkit
+## Sécurisation application designer
 
 # Sources
 Wikipedia https://en.wikipedia.org/wiki/Public-key_cryptography
