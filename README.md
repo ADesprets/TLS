@@ -22,7 +22,7 @@ To share information in a secure fashion...
 * Only the holders of the secret code will be able to make sense of the protected message
 
 ### Julius Caesar
-Julius Caesar uses symmetric encryption to convey messages. The Caesar cipher is a simple substitution cipher in which each letter of the plaintext is rotated left or right by some number of positions down the alphabet.
+Julius Caesar used symmetric encryption to convey messages. The Caesar cipher is a simple substitution cipher in which each letter of the plaintext is rotated left or right by some number of positions (key) down the alphabet.
 
 Here is a sample of encrypting the message `hello caesar` with different keys:
 
@@ -31,12 +31,12 @@ Here is a sample of encrypting the message `hello caesar` with different keys:
 ### The wheel of Thomas Jefferson
 The future president of the United invented a more robust mechanism but also very simple.
 The wheel are made of a good number (for example between 30 and 40, 36 for the original model) of small disks. Each disk gets the 26 letters of the alphabet in any order and different between each disk. Like with Caesar, you roll all the disks with a key (rotation mechanism).
-The big advantage of this system is that now, you not only need know the key (to rotate the disk correctly) but also get physical the same wheel used to encrypt the data, so a combination of what you know and what you have. Of course, it raises the challenge of distributing securely the wheel. The wheel of Jefferson was used under the name of M.94 by the United States army between 1924 and 1942.
+The big advantage of this system is that now, you not only need to know the key (to rotate the disk correctly) but also get the same (physically) wheel used to encrypt the data, so a combination of what you know and what you have. Of course, it raises the challenge of distributing securely the wheel. The wheel of Jefferson was used under the name of M.94 by the United States army between 1924 and 1942.
 
 ![Jefferson wheel](./images/jefferson.jpg)
 
 ### Enigma
-The famous Enigma machine, invented in 1918, is again an evolution following a measure and counter measure evolution. The problem with existing cryptographic system at the time, like with the wheel of Jefferson, is that using a pretty small amount of time a brute force attack can be done by a human. This concept is important, if the difference of time to encrypt and decrypt is small then the system is not good. One reason is that the value of confidential information usually decreases over time. Enigma is going to use the latest technology, and in particular the use of electricity and electro-mechanic in order to make the number of combinations very large (4,64 * 10^22). It is some ways similar to the wheel of Jefferson but where you had 26 different keys for each wheel, here using 3 rotors of 26 letters, the number is so large that a human would not be able to decipher the message especially with a brute force attack. One additional concept used in Enigma is also that the association between each letter change every time a letter is typed using the three rotors, which improves greatly the algorithm. Only Alan Turing was able to create a machine to perform automatic testing.
+The famous Enigma machine, invented in 1918, is again an evolution following a measure and counter measure evolution. The problem with existing cryptographic system at the time, like with the wheel of Jefferson, is that using a pretty small amount of time a brute force attack can be done by a human. This concept is important, if the difference of time to encrypt and decrypt is small then the system is not efficient. One reason is that the value of confidential information usually decreases over time. Enigma is going to use the latest technology, and in particular the use of electricity and electro-mechanic in order to make the number of combinations very large (4,64 * 10^22). It is some ways similar to the wheel of Jefferson but where you had 26 different keys for each wheel, here using 3 rotors of 26 letters, the number is so large that a human would not be able to decipher the message especially with a brute force attack. One additional concept used in Enigma is also that the association between each letter change every time a letter is typed using the three rotors, which improves greatly the algorithm. Only Alan Turing was able to create a machine to perform automatic testing and brute attack.
 
 ![Enigma](./images/Enigma_1940.JPG)
 
@@ -174,7 +174,7 @@ But we have the same distribution problem as earlier - secure distribution of id
 recipient certificate contains its public key
 * sender simply collects the recipient's digital certificate, validates CA digital signature and extracts public key.
 
-At then end, we have a chain of certificates. A certificate is signed with the private key associated to the public key of the signer provided with the signer certificate. And again, and again, etc ... Of course, there is an end, there is a special certificate, called a root certificate where the private key associated to the public key is the one used to sign this certificate. This is a certificate signed by its owner a self-signed certificate. Instead of having each certificate to trust, we only need to trust one level (at the minimum), it can be root, an intermediary or the top certificate. This is the reason why browsers ship with some 50 "known" signing "Certificate Authorities. Those certificate authorities follow a strict process to create the toot and chain of certificates.
+At then end, we have a chain of certificates. A certificate is signed with the private key associated to the public key of the signer provided with the signer certificate. And again, and again, etc ... Of course, there is an end, there is a special certificate, called a root certificate where the private key associated to the public key is the one used to sign this certificate. This is a certificate signed by its owner a self-signed certificate. Instead of having each certificate to trust, we only need to trust one level (at the minimum), it can be root, an intermediary or the top certificate. This is the reason why browsers ship with some 50 "known" signing "Certificate Authorities. Those certificate authorities follow a strict process to create the root and chain of certificates.
 
 Usually the number of certificate in the chain is limited, around 3 or 4. Below a sample of the chain of certificates from the IBM cloud website (https://cloud.ibm.com/):
 
@@ -231,7 +231,8 @@ The owner of the key pair may not continue using the key pair securely
 The key pair is revoked and the associated certificate is placed on a "certificate revocation list" (CRL)
 All users of digital certificates must check a trusted CRL before accepting a certificate
 What if the certificate has expired?
-The owner should request a new certificate
+The owner should request a new certificate.
+OCSP stands for Online Certificate Status Protocol: instead of replicating the CRL from time to time, you have a direct call (real time) to a service that provide the status of the certificate (revoked or not). This is better, but this service usually is not free.
 
 # TLS and SSL
 ## Netscape contribution
@@ -282,8 +283,8 @@ There are several formats for the stores:
 * der - Binary encoding
 * p7b - PKCS7 based store
 
-To configure SSL/TLS, you need to add the server certificate if not present (or a parent in the chain of certificate) into the trust store of the client (red arrow).
-If you use mutual SSL/TLS, you need to add the client certificate if not present (or a parent in the chain of certificate) on the trust store of the server (green arrow).
+To configure SSL/TLS, you need to add the server certificate if not present (or a parent in the chain of certificates) into the trust store of the client (red arrow).
+If you use mutual SSL/TLS, you need to add the client certificate if not present (or a parent in the chain of certificates) on the trust store of the server (green arrow).
 
 ![Trust store and key store](./images/trust-key-stores.png)
 
@@ -311,6 +312,53 @@ To create Certificate Signing Request
 The following command will return the validity of a certificate
 kubectl get secret <secret> -o yaml | grep "\.crt" | awk '{ print $2 }' | base64 --decode | openssl x509 -in - -text |grep Validity -A 2
 ![Debug Certificate validity](./images/debug-get-cert-validity.png)
+
+Below a script to find expired or about to expire certificates:
+
+```
+#!/bin/bash
+# Programm to identify expired certificates or about to expire certificates
+# expiry_duration is the duration in days before it expires
+expiry_duration=7
+exp_dur_sec=$((expiry_duration * 86400))
+echo "Enter the namespace"
+# read namespace
+namespace=apic
+echo "Validates expired certificates in $namespace namespace that will be expired in $expiry_duration days"
+
+# Get all the secrets inside the namespace
+tls_secrets=$(kubectl get secret -n $namespace --field-selector type=kubernetes.io/tls --no-headers=true | awk {'print $1'})
+
+for tls_secret in $tls_secrets
+do
+  # get the data object value that describes the certificates (need to be parsed)
+  secret_certs=$(kubectl get secret $tls_secret -n $namespace  -o jsonpath='{.data}')
+  # remove leading and trailing characters
+  secret_certs=${secret_certs:4:-1}
+  # separating each certificate
+  for cert in $secret_certs
+  do
+    certname=$(echo $cert | awk -F ':' '{print $1}')
+    # this is a certificate if extension is crt
+    filename=$(basename "$certname")
+    ext="${filename##*.}"
+    if [ $ext = "crt" ]
+    then
+      # check expiration
+      check_expiry=$(echo $cert | awk -F ':' '{print $2}' | base64 --decode | openssl x509 -noout -checkend $exp_dur_sec)
+      if [ "$check_expiry" == "Certificate will expire" ]
+      then
+        expiry_date=$(echo $cert | awk -F ':' '{print $2}' | base64 --decode | openssl x509 -noout -enddate)
+        expiry_date=${expiry_date#"notAfter="} 
+        echo "$tls_secret : $certname : $expiry_date"
+      fi
+    fi
+  done
+done
+
+exit 0
+
+```
 
 # Scenario
 ## Ajouter TLS invocation API
