@@ -1,7 +1,5 @@
 <p align="center"><img src="./images/title-banner.png"</p>
 
-This is work in progress as of 21st July 2020 (first version)!!!!
-
 # Introduction
 This paper is an attempt to explain TLS. You will find here the basis of better understanding what is behind and the challenges to manage keys. This should help you to configure any product when using TLS.
 # Fundamentals
