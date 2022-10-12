@@ -305,6 +305,155 @@ To retrieve the certificate from a server
 To create Certificate Signing Request
 `openssl req -new -newkey rsa:2048 -nodes -out servername.csr -keyout servername.key`
 
+### Script to create a chain of certificate with 2 levels
+It provides a lot of control on how the certificate are created.
+
+```
+# This script is used to generate a chain of certificates with 2 levels
+# It generates p12 and pem files for the root and leaf certificates.
+# The labels are specified with the option -name if you want to change it
+# It is very likely that you will want to update the serverFQDN and serverShortName at least.
+# You will also probably change the configuration used to build the DN of the certificates
+# This link is pretty interesting though it is a different approach: https://www.golinuxcloud.com/openssl-create-certificate-chain-linux/
+
+# serverFQDN=cp4i-apic-egw-event-gw-client-cp4i.cp4i-cluster-b34dfa42ccf328c7da72e2882c1627b1-0000.eu-de.containers.appdomain.cloud
+serverFQDN=cp4i-apic-gw-gateway-cp4i.cp4i-cluster-b34dfa42ccf328c7da72e2882c1627b1-0000.eu-de.containers.appdomain.cloud
+# serverShortName=cp4i-apic-egw-event-gw-client-cp4i
+serverShortName=cp4i-apic-gw-gateway-cp4i
+
+# First we start to generate several files used to generate keys and certificate later, you may have to configure the content
+
+# generate password file used in several places
+cat > password.txt << EOF
+secretin
+secretout
+EOF
+
+# generate password file used in several places, this file is used for converting the P12 into pem
+# so the first line is the one to access the p12 (which is the second line of the password.txt)
+cat > passwordout.txt << EOF
+secretout
+secretout
+EOF
+
+# generate root serial number file 
+cat > root.ser << EOF
+$(uuidgen)
+EOF
+
+# generate root certificate conf file
+cat > root.conf << EOF
+[ req ]
+default_bits       = 2048
+distinguished_name = req_DN
+string_mask        = nombstr
+prompt             = no
+
+[ req_DN ]
+C            = FR
+ST           = Herault
+L            = Montpellier
+O            = IBM
+OU           = APIC
+CN           = rootca
+emailAddress = admin@fr.ibm.com
+EOF
+
+# generate root extension file
+cat > root.ext << EOF
+extensions = x509v3
+
+[ x509v3 ]
+basicConstraints        = CA:true,pathlen:2
+keyUsage                = digitalSignature,nonRepudiation,keyEncipherment,keyCertSign,cRLSign
+extendedKeyUsage        = serverAuth,clientAuth,emailProtection,codeSigning,timeStamping
+subjectKeyIdentifier    = hash
+authorityKeyIdentifier  = keyid,issuer
+authorityInfoAccess     = OCSP;URI:http://ocsp.mydummycompany.com/,caIssuers;URI:http://www.ca.mydummycompany.com/ca.html
+crlDistributionPoints   = URI:http://www.ca.mydummycompany.com/myca.crl
+nsComment               = "My Dummy Company Root CA"
+EOF
+
+# Generate private key for root certificate
+openssl genrsa -aes256 -passout file:password.txt -out root.key 2048
+
+# Generate certificate request for root certificate
+openssl req -config root.conf -new -key root.key -passin file:password.txt -out root.csr
+
+# Generate certificate for root certificate
+openssl x509 -days 7200 -extfile root.ext -signkey root.key -CAserial root.ser -passin file:password.txt -in root.csr -req -out root.crt
+
+# Generate PKC12 key store with the root certificate
+openssl pkcs12 -export -in root.crt -inkey root.key -passin file:password.txt -name RootCertificate -out root.p12 -passout file:password.txt
+
+# Debug information
+# openssl req -in root.csr -noout -text
+
+# Below all the configuration for the eaf certificate
+
+# generate leaf serial number file 
+cat > leaf.ser << EOF
+$(uuidgen)
+EOF
+
+# generate leaf configuration file 
+cat > leaf.conf << EOF
+[ req ]
+default_bits               = 2048
+distinguished_name         = req_DN
+string_mask                = nombstr
+prompt                     = no
+
+[ req_DN ]
+C            = FR
+ST           = Herault
+L            = Montpellier
+O            = IBM
+OU           = APIC
+CN           = server
+emailAddress = eegadmin@fr.ibm.com
+EOF
+
+# Generate extension file (important here is the SAN)
+cat > leaf.ext << EOF
+extensions = x509v3
+
+[ x509v3 ]
+basicConstraints        = CA:FALSE
+keyUsage                = digitalSignature,nonRepudiation,keyEncipherment
+extendedKeyUsage        = serverAuth,clientAuth
+subjectKeyIdentifier    = hash
+authorityKeyIdentifier  = keyid,issuer
+authorityInfoAccess     = OCSP;URI:http://ocsp.mydummycompany.com/,caIssuers;URI:http://www.ca.mydummycompany.com/ca.html
+crlDistributionPoints   = URI:http://www.ca.mydummycompany.com/myca.crl
+subjectAltName          = DNS:$serverFQDN,DNS:$serverShortName
+EOF
+
+# Generate private key for leaf certificate
+openssl genrsa -aes256 -passout file:password.txt -out leaf.key 2048
+
+# Generate certificate request for leaf certificate
+openssl req -config leaf.conf -new -key leaf.key -passin file:password.txt -out leaf.csr
+
+# Generate certificate for leaf certificate
+openssl x509 -days 1825 -extfile leaf.ext -CA root.crt -CAkey root.key -passin file:password.txt -CAserial leaf.ser -in leaf.csr -req -out leaf.crt
+
+# It is important to put the root at the end
+cat leaf.crt > chain.pem
+cat root.crt >> chain.pem
+
+# Generate PKC12 key store with the root certificate
+# openssl pkcs12 -export -in leaf.crt -inkey leaf.key -CAfile root.crt -passin file:password.txt -name LeafCertificate -certfile chain.pem -out leafwithchain.p12 -passout file:password.txt
+openssl pkcs12 -export -in leaf.crt -inkey leaf.key -CAfile chain.pem -passin file:password.txt -name LeafCertificate -chain -out leafwithchain.p12 -passout file:password.txt
+
+# Generate several pem files with or without keys
+openssl pkcs12 -in leafwithchain.p12 -out server-cert.pem -clcerts -passin file:passwordout.txt -passout file:passwordout.txt
+openssl pkcs12 -in leafwithchain.p12 -out server-cert-signers.pem -cacerts -passin file:passwordout.txt -passout file:passwordout.txt -nokeys
+# Perform some cleaning (most files are generated in this script)
+rm chain.pem leaf.conf leaf.csr leaf.ext leaf.key leaf.ser passwordout.txt root.conf root.csr root.ext root.key root.ser
+
+```
+
 ## Debugging
 ### In Kubernetes world
 The following command will return the validity of a certificate
