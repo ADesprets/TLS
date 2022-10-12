@@ -306,7 +306,7 @@ To create Certificate Signing Request
 `openssl req -new -newkey rsa:2048 -nodes -out servername.csr -keyout servername.key`
 
 ### Script to create a chain of certificate with 2 levels
-It provides a lot of control on how the certificate are created.
+It provides a lot of controls on how the certificates are created.
 
 ```
 # This script is used to generate a chain of certificates with 2 levels
