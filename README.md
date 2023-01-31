@@ -117,7 +117,7 @@ Here is the mathematical definition of a surjection:
 
 ![Surjection](./images/surjection.png)
 
-Let's illustrate a hash function. What ever the lengths, the results have the same length. Changing a few characters change the results completely. This last property is what we use to improve performances of the signature scenario by hashing only a hash value of the original message instead of the full message. Of course, this is useful for signature and does not apply to encryption. (Hashing is a surjection, and we need to get the full message decrypted, not its hash!).
+Let's illustrate a hash function. What ever the lengths, the results have the same length. Changing a few characters change the results completely. This last property is what we use to improve performances of the signature scenario by signing only a hash value of the original message instead of the full message. Of course, this is useful for signature and does not apply to encryption. (Hashing is a surjection, and we need to get the full message decrypted, not its hash!).
 
 ![Hashing](./images/hash.png)
 
@@ -310,6 +310,7 @@ It provides a lot of controls on how the certificates are created.
 
 ```
 # This script is used to generate a chain of certificates with 2 levels
+# File name: create-cert-chain.sh
 # It generates p12 and pem files for the root and leaf certificates.
 # The labels are specified with the option -name if you want to change it
 # It is very likely that you will want to update the serverFQDN and serverShortName at least.
